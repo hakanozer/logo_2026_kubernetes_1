@@ -1,0 +1,181 @@
+services:
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.13.0
+    container_name: argela-elasticsearch
+
+    environment:
+      - discovery.type=single-node
+      - xpack.security.enabled=false
+      - xpack.security.http.ssl.enabled=false
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+      - ELASTIC_PASSWORD=argela123
+
+    ports:
+      - "9200:9200"
+      - "9300:9300"
+
+    volumes:
+      - elasticsearch-data:/usr/share/elasticsearch/data
+
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+
+    healthcheck:
+      test: [ "CMD-SHELL", "curl -s http://localhost:9200 >/dev/null || exit 1" ]
+      interval: 10s
+      timeout: 10s
+      retries: 20
+
+    networks:
+      - argela-network
+
+  kibana:
+    image: docker.elastic.co/kibana/kibana:8.13.0
+    container_name: argela-kibana
+    depends_on:
+      - elasticsearch
+    ports:
+      - "5601:5601"    # http://localhost:5601
+    environment:
+      - ELASTICSEARCH_HOSTS=http://elasticsearch:9200
+      - xpack.security.enabled=false
+    networks:
+      - argela-network
+
+  logstash:
+    image: docker.elastic.co/logstash/logstash:8.13.0
+    container_name: argela-logstash
+
+    depends_on:
+      elasticsearch:
+        condition: service_healthy
+
+    ports:
+      - "5044:5044"
+      - "5001:5001"
+      - "9600:9600"
+
+    volumes:
+      - ./logstash/pipeline:/usr/share/logstash/pipeline
+      - ./logstash/config/logstash.yml:/usr/share/logstash/config/logstash.yml
+
+    environment:
+      - "LS_JAVA_OPTS=-Xms256m -Xmx256m"
+
+    restart: unless-stopped
+
+    networks:
+      - argela-network
+  # =========================
+  # Redis
+  # =========================
+  redis:
+    image: redis:7.2-alpine
+    container_name: argela-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis-data:/data
+    command: redis-server --save 20 1 --loglevel warning --requirepass argela123
+    restart: unless-stopped
+    networks:
+      - argela-network
+
+  # Redis Web UI
+  redis-commander:
+    image: rediscommander/redis-commander:latest
+    container_name: argela-redis-ui
+    environment:
+      - REDIS_HOSTS=local:redis:6379:0:argela123
+    ports:
+      - "8090:8081"
+    depends_on:
+      - redis
+    restart: unless-stopped
+    networks:
+      - argela-network
+
+  # =========================
+  # Zookeeper
+  # =========================
+  zookeeper:
+    image: confluentinc/cp-zookeeper:7.6.0
+    container_name: argela-zookeeper
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+      ZOOKEEPER_TICK_TIME: 2000
+    volumes:
+      - zookeeper-data:/var/lib/zookeeper/data
+    restart: unless-stopped
+    networks:
+      - argela-network
+
+  # =========================
+  # Kafka Broker
+  # =========================
+  kafka:
+    image: confluentinc/cp-kafka:7.6.0
+    container_name: argela-kafka
+    depends_on:
+      - zookeeper
+    ports:
+      - "9092:9092"
+    environment:
+      KAFKA_BROKER_ID: 1
+
+      # Zookeeper bağlantısı
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+
+      # Listener ayarları
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:29092,PLAINTEXT_HOST://localhost:9092
+
+      # Tek broker için gerekli ayarlar
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
+
+      # Topic auto create
+      KAFKA_AUTO_CREATE_TOPICS_ENABLE: 'true'
+
+      # Log retention
+      KAFKA_LOG_RETENTION_HOURS: 168
+    volumes:
+      - kafka-data:/var/lib/kafka/data
+    restart: unless-stopped
+    networks:
+      - argela-network
+
+  # =========================
+  # Kafka UI
+  # =========================
+  kafka-ui:
+    image: provectuslabs/kafka-ui:latest
+    container_name: argela-kafka-ui
+    depends_on:
+      - kafka
+    ports:
+      - "8091:8080"
+    environment:
+      KAFKA_CLUSTERS_0_NAME: argela-cluster
+      KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: kafka:29092
+    restart: unless-stopped
+    networks:
+      - argela-network
+
+# =========================
+# Volumes
+# =========================
+volumes:
+  redis-data:
+  zookeeper-data:
+  kafka-data:
+  elasticsearch-data:
+
+# =========================
+# Networks
+# =========================
+networks:
+  argela-network:
+    driver: bridge
