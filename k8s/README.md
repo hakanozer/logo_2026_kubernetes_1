@@ -5,7 +5,7 @@ Bu klasor, projeyi Kubernetes ortaminda calistirmak icin gerekli manifestleri ve
 ## 1) Docker image olustur
 
 ```zsh
-cd '/Users/hakan/Documents/GitHub/argela_2026_microservice'
+cd '/Users/hakan/Documents/GitHub/logo_2026_microservice'
 chmod +x k8s/build-images.sh
 ./k8s/build-images.sh
 ```
@@ -13,27 +13,27 @@ chmod +x k8s/build-images.sh
 ## 2) Namespace ve altyapiyi kur
 
 ```zsh
-cd '/Users/hakan/Documents/GitHub/argela_2026_microservice'
+cd '/Users/hakan/Documents/GitHub/logo_2026_microservice'
 kubectl apply -f k8s/namespace.yaml
 kubectl apply -f k8s/infrastructure.yaml
 ```
 
-Eger `pull access denied for argela/...` veya `ImagePullBackOff` hatasi gorursen:
+Eger `pull access denied for logo/...` veya `ImagePullBackOff` hatasi gorursen:
 
 ```zsh
-cd '/Users/hakan/Documents/GitHub/argela_2026_microservice'
+cd '/Users/hakan/Documents/GitHub/logo_2026_microservice'
 ./k8s/build-images.sh
-kubectl -n argela-ms delete pod -l app=api-gateway
-kubectl -n argela-ms delete pod -l app=inventory-service
-kubectl -n argela-ms delete pod -l app=order-service
-kubectl -n argela-ms delete pod -l app=payment-service
-kubectl -n argela-ms delete pod -l app=notification-service
+kubectl -n logo-ms delete pod -l app=api-gateway
+kubectl -n logo-ms delete pod -l app=inventory-service
+kubectl -n logo-ms delete pod -l app=order-service
+kubectl -n logo-ms delete pod -l app=payment-service
+kubectl -n logo-ms delete pod -l app=notification-service
 ```
 
 ## 3) Mikroservisleri kur
 
 ```zsh
-cd '/Users/hakan/Documents/GitHub/argela_2026_microservice'
+cd '/Users/hakan/Documents/GitHub/logo_2026_microservice'
 kubectl apply -f k8s/microservices.yaml
 ```
 
@@ -42,7 +42,7 @@ kubectl apply -f k8s/microservices.yaml
 Local makineden ApiGateway'e baglanmak icin port-forward kullan:
 
 ```zsh
-kubectl -n argela-ms port-forward svc/api-gateway 8080:8080
+kubectl -n logo-ms port-forward svc/api-gateway 8080:8080
 ```
 
 Sonra endpointler:
@@ -80,11 +80,11 @@ Olusan token ile login ol.
 Bu projede Kubernetes Service kaynaklari registry gorevini gorur.
 Pod'lar birbirine DNS adi ile erisir:
 
-- `inventory-service.argela-ms.svc.cluster.local`
-- `order-service.argela-ms.svc.cluster.local`
-- `payment-service.argela-ms.svc.cluster.local`
-- `notification-service.argela-ms.svc.cluster.local`
-- `redis.argela-ms.svc.cluster.local`
-- `kafka.argela-ms.svc.cluster.local`
-- `elasticsearch.argela-ms.svc.cluster.local`
+- `inventory-service.logo-ms.svc.cluster.local`
+- `order-service.logo-ms.svc.cluster.local`
+- `payment-service.logo-ms.svc.cluster.local`
+- `notification-service.logo-ms.svc.cluster.local`
+- `redis.logo-ms.svc.cluster.local`
+- `kafka.logo-ms.svc.cluster.local`
+- `elasticsearch.logo-ms.svc.cluster.local`
 

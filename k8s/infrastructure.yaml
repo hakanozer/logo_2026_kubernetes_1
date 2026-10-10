@@ -2,7 +2,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: redis
-  namespace: argela-ms
+  namespace: logo-ms
 spec:
   replicas: 1
   selector:
@@ -17,7 +17,7 @@ spec:
         - name: redis
           image: redis:7.2-alpine
           imagePullPolicy: IfNotPresent
-          command: ["redis-server", "--save", "20", "1", "--loglevel", "warning", "--requirepass", "argela123"]
+          command: ["redis-server", "--save", "20", "1", "--loglevel", "warning", "--requirepass", "logo123"]
           ports:
             - containerPort: 6379
 ---
@@ -25,7 +25,7 @@ apiVersion: v1
 kind: Service
 metadata:
   name: redis
-  namespace: argela-ms
+  namespace: logo-ms
 spec:
   selector:
     app: redis
@@ -38,7 +38,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: zookeeper
-  namespace: argela-ms
+  namespace: logo-ms
 spec:
   replicas: 1
   selector:
@@ -65,7 +65,7 @@ apiVersion: v1
 kind: Service
 metadata:
   name: zookeeper
-  namespace: argela-ms
+  namespace: logo-ms
 spec:
   selector:
     app: zookeeper
@@ -78,7 +78,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: kafka
-  namespace: argela-ms
+  namespace: logo-ms
 spec:
   replicas: 1
   selector:
@@ -120,7 +120,7 @@ apiVersion: v1
 kind: Service
 metadata:
   name: kafka
-  namespace: argela-ms
+  namespace: logo-ms
 spec:
   selector:
     app: kafka
@@ -133,7 +133,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: elasticsearch
-  namespace: argela-ms
+  namespace: logo-ms
 spec:
   replicas: 1
   selector:
@@ -164,7 +164,7 @@ apiVersion: v1
 kind: Service
 metadata:
   name: elasticsearch
-  namespace: argela-ms
+  namespace: logo-ms
 spec:
   selector:
     app: elasticsearch

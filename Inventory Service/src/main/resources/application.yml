@@ -2,4 +2,4 @@ spring:
   elasticsearch:
     uris: ${ELASTICSEARCH_URIS:http://localhost:9200}
     # username: elastic     # Security aktifse
-    # password: argela123
+    # password: logo123

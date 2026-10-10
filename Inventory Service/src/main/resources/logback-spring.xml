@@ -26,7 +26,7 @@
         <url>http://localhost:9200/_bulk</url>
 
         <!-- Index strategy -->
-        <index>argela-logs-%date{yyyy.MM.dd}</index>
+        <index>logo-logs-%date{yyyy.MM.dd}</index>
 
         <loggerName>es-logger</loggerName>
         <errorLoggerName>es-error-logger</errorLoggerName>
@@ -62,6 +62,6 @@
     <!-- ========================= -->
     <!-- APP LOG LEVEL -->
     <!-- ========================= -->
-    <logger name="com.argela" level="DEBUG"/>
+    <logger name="com.logo" level="DEBUG"/>
 
 </configuration>
