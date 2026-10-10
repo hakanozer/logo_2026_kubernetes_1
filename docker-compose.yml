@@ -1,14 +1,14 @@
 services:
   elasticsearch:
     image: docker.elastic.co/elasticsearch/elasticsearch:8.13.0
-    container_name: argela-elasticsearch
+    container_name: logo-elasticsearch
 
     environment:
       - discovery.type=single-node
       - xpack.security.enabled=false
       - xpack.security.http.ssl.enabled=false
       - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
-      - ELASTIC_PASSWORD=argela123
+      - ELASTIC_PASSWORD=logo123
 
     ports:
       - "9200:9200"
@@ -29,11 +29,11 @@ services:
       retries: 20
 
     networks:
-      - argela-network
+      - logo-network
 
   kibana:
     image: docker.elastic.co/kibana/kibana:8.13.0
-    container_name: argela-kibana
+    container_name: logo-kibana
     depends_on:
       - elasticsearch
     ports:
@@ -42,11 +42,11 @@ services:
       - ELASTICSEARCH_HOSTS=http://elasticsearch:9200
       - xpack.security.enabled=false
     networks:
-      - argela-network
+      - logo-network
 
   logstash:
     image: docker.elastic.co/logstash/logstash:8.13.0
-    container_name: argela-logstash
+    container_name: logo-logstash
 
     depends_on:
       elasticsearch:
@@ -67,42 +67,42 @@ services:
     restart: unless-stopped
 
     networks:
-      - argela-network
+      - logo-network
   # =========================
   # Redis
   # =========================
   redis:
     image: redis:7.2-alpine
-    container_name: argela-redis
+    container_name: logo-redis
     ports:
       - "6379:6379"
     volumes:
       - redis-data:/data
-    command: redis-server --save 20 1 --loglevel warning --requirepass argela123
+    command: redis-server --save 20 1 --loglevel warning --requirepass logo123
     restart: unless-stopped
     networks:
-      - argela-network
+      - logo-network
 
   # Redis Web UI
   redis-commander:
     image: rediscommander/redis-commander:latest
-    container_name: argela-redis-ui
+    container_name: logo-redis-ui
     environment:
-      - REDIS_HOSTS=local:redis:6379:0:argela123
+      - REDIS_HOSTS=local:redis:6379:0:logo123
     ports:
       - "8090:8081"
     depends_on:
       - redis
     restart: unless-stopped
     networks:
-      - argela-network
+      - logo-network
 
   # =========================
   # Zookeeper
   # =========================
   zookeeper:
     image: confluentinc/cp-zookeeper:7.6.0
-    container_name: argela-zookeeper
+    container_name: logo-zookeeper
     environment:
       ZOOKEEPER_CLIENT_PORT: 2181
       ZOOKEEPER_TICK_TIME: 2000
@@ -110,14 +110,14 @@ services:
       - zookeeper-data:/var/lib/zookeeper/data
     restart: unless-stopped
     networks:
-      - argela-network
+      - logo-network
 
   # =========================
   # Kafka Broker
   # =========================
   kafka:
     image: confluentinc/cp-kafka:7.6.0
-    container_name: argela-kafka
+    container_name: logo-kafka
     depends_on:
       - zookeeper
     ports:
@@ -145,24 +145,24 @@ services:
       - kafka-data:/var/lib/kafka/data
     restart: unless-stopped
     networks:
-      - argela-network
+      - logo-network
 
   # =========================
   # Kafka UI
   # =========================
   kafka-ui:
     image: provectuslabs/kafka-ui:latest
-    container_name: argela-kafka-ui
+    container_name: logo-kafka-ui
     depends_on:
       - kafka
     ports:
       - "8091:8080"
     environment:
-      KAFKA_CLUSTERS_0_NAME: argela-cluster
+      KAFKA_CLUSTERS_0_NAME: logo-cluster
       KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: kafka:29092
     restart: unless-stopped
     networks:
-      - argela-network
+      - logo-network
 
 # =========================
 # Volumes
@@ -177,5 +177,5 @@ volumes:
 # Networks
 # =========================
 networks:
-  argela-network:
+  logo-network:
     driver: bridge
