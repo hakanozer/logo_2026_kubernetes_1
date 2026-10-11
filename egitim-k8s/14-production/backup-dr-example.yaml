@@ -1,0 +1,10 @@
+apiVersion: velero.io/v1
+kind: Backup
+metadata:
+  name: logo-ms-training-backup
+  namespace: velero
+spec:
+  includedNamespaces:
+    - logo-ms
+  ttl: 168h0m0s
+  snapshotVolumes: true

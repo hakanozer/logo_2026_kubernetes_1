@@ -1,0 +1,51 @@
+nameOverride: ""
+imagePullPolicy: Never
+orderDataClaim: order-data
+secrets:
+  REDIS_PASSWORD: logo123
+  SPRING_DATASOURCE_USERNAME: sa
+  SPRING_DATASOURCE_PASSWORD: sa
+services:
+  api-gateway:
+    replicas: 1
+    image: logo/api-gateway:training
+    port: 8080
+    env:
+      GATEWAY_INVENTORY_URL: http://inventory-service:8083
+      GATEWAY_ORDER_URL: http://order-service:8081/order
+      GATEWAY_PAYMENT_URL: http://payment-service:8082
+      GATEWAY_NOTIFICATION_URL: http://notification-service:8084
+    secretEnv: {}
+  inventory-service:
+    replicas: 1
+    image: logo/inventory-service:training
+    port: 8083
+    env:
+      ELASTICSEARCH_URIS: http://elasticsearch:9200
+    secretEnv: {}
+  order-service:
+    replicas: 1
+    image: logo/order-service:training
+    port: 8081
+    env:
+      REDIS_HOST: redis
+      REDIS_PORT: "6379"
+      KAFKA_BOOTSTRAP_SERVERS: kafka:9092
+      SPRING_DATASOURCE_URL: "jdbc:h2:file:/data/order-service;AUTO_SERVER=TRUE;"
+    secretEnv:
+      REDIS_PASSWORD: REDIS_PASSWORD
+      SPRING_DATASOURCE_USERNAME: SPRING_DATASOURCE_USERNAME
+      SPRING_DATASOURCE_PASSWORD: SPRING_DATASOURCE_PASSWORD
+  payment-service:
+    replicas: 1
+    image: logo/payment-service:training
+    port: 8082
+    env:
+      KAFKA_BOOTSTRAP_SERVERS: kafka:9092
+    secretEnv: {}
+  notification-service:
+    replicas: 1
+    image: logo/notification-service:training
+    port: 8084
+    env: {}
+    secretEnv: {}

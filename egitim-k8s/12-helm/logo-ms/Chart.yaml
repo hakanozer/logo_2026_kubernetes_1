@@ -1,0 +1,6 @@
+apiVersion: v2
+name: logo-ms
+description: Training chart for the five Logo Spring Boot application services
+type: application
+version: 0.1.0
+appVersion: "training"

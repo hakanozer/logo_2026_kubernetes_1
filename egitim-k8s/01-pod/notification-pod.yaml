@@ -1,0 +1,16 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: notification-once
+  namespace: logo-ms
+  labels:
+    app: notification-demo
+    app.kubernetes.io/part-of: logo-microservices
+spec:
+  containers:
+    - name: notification
+      image: logo/notification-service:training
+      imagePullPolicy: Never
+      ports:
+        - name: http
+          containerPort: 8084

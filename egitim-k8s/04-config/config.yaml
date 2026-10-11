@@ -1,0 +1,83 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: gateway-config
+  namespace: logo-ms
+data:
+  GATEWAY_INVENTORY_URL: http://inventory-service:8083
+  GATEWAY_ORDER_URL: http://order-service:8081/order
+  GATEWAY_PAYMENT_URL: http://payment-service:8082
+  GATEWAY_NOTIFICATION_URL: http://notification-service:8084
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: inventory-config
+  namespace: logo-ms
+data:
+  ELASTICSEARCH_URIS: http://elasticsearch:9200
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: order-config
+  namespace: logo-ms
+data:
+  REDIS_HOST: redis
+  REDIS_PORT: "6379"
+  KAFKA_BOOTSTRAP_SERVERS: kafka:9092
+  SPRING_DATASOURCE_URL: "jdbc:h2:file:/data/order-service;AUTO_SERVER=TRUE;"
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: payment-config
+  namespace: logo-ms
+data:
+  KAFKA_BOOTSTRAP_SERVERS: kafka:9092
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: order-secret
+  namespace: logo-ms
+type: Opaque
+stringData:
+  REDIS_PASSWORD: logo123
+  SPRING_DATASOURCE_USERNAME: sa
+  SPRING_DATASOURCE_PASSWORD: sa
+---
+apiVersion: v1
+kind: ResourceQuota
+metadata:
+  name: logo-ms-quota
+  namespace: logo-ms
+spec:
+  hard:
+    pods: "40"
+    requests.cpu: "4"
+    requests.memory: 8Gi
+    limits.cpu: "8"
+    limits.memory: 12Gi
+    requests.storage: 20Gi
+---
+apiVersion: v1
+kind: LimitRange
+metadata:
+  name: logo-ms-limits
+  namespace: logo-ms
+spec:
+  limits:
+    - type: Container
+      min:
+        cpu: 50m
+        memory: 64Mi
+      max:
+        cpu: "2"
+        memory: 4Gi
+      defaultRequest:
+        cpu: 100m
+        memory: 128Mi
+      default:
+        cpu: 500m
+        memory: 512Mi

@@ -1,0 +1,67 @@
+{{- range $name, $service := .Values.services }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ $name }}
+  namespace: {{ $.Release.Namespace }}
+  labels:
+    app: {{ $name }}
+    app.kubernetes.io/name: {{ $name }}
+    app.kubernetes.io/part-of: logo-microservices
+spec:
+  replicas: {{ $service.replicas }}
+  selector:
+    matchLabels:
+      app: {{ $name }}
+  template:
+    metadata:
+      labels:
+        app: {{ $name }}
+        app.kubernetes.io/name: {{ $name }}
+        app.kubernetes.io/part-of: logo-microservices
+        environment: training
+    spec:
+      containers:
+        - name: {{ $name }}
+          image: {{ $service.image | quote }}
+          imagePullPolicy: {{ $.Values.imagePullPolicy }}
+          ports:
+            - name: http
+              containerPort: {{ $service.port }}
+          envFrom:
+            - configMapRef:
+                name: {{ $name }}-config
+{{- if $service.secretEnv }}
+          env:
+{{- range $envName, $secretKey := $service.secretEnv }}
+            - name: {{ $envName }}
+              valueFrom:
+                secretKeyRef:
+                  name: order-secret
+                  key: {{ $secretKey }}
+{{- end }}
+{{- end }}
+{{- if eq $name "order-service" }}
+          volumeMounts:
+            - name: order-data
+              mountPath: /data
+      volumes:
+        - name: order-data
+          persistentVolumeClaim:
+            claimName: {{ $.Values.orderDataClaim }}
+{{- end }}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ $name }}
+  namespace: {{ $.Release.Namespace }}
+spec:
+  selector:
+    app: {{ $name }}
+  ports:
+    - name: http
+      port: {{ $service.port }}
+      targetPort: http
+---
+{{- end }}

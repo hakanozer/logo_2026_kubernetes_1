@@ -1,0 +1,12 @@
+imagePullPolicy: IfNotPresent
+services:
+  api-gateway:
+    replicas: 3
+  inventory-service:
+    replicas: 2
+  order-service:
+    replicas: 1
+  payment-service:
+    replicas: 3
+  notification-service:
+    replicas: 2

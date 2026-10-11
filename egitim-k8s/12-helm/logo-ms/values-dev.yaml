@@ -1,0 +1,12 @@
+imagePullPolicy: Never
+services:
+  api-gateway:
+    replicas: 1
+  inventory-service:
+    replicas: 1
+  order-service:
+    replicas: 1
+  payment-service:
+    replicas: 1
+  notification-service:
+    replicas: 1

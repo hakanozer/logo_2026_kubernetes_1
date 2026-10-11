@@ -1,0 +1,36 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: order-service
+  namespace: logo-ms
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: order-service
+  template:
+    metadata:
+      labels:
+        app: order-service
+        app.kubernetes.io/part-of: logo-microservices
+        environment: training
+    spec:
+      containers:
+        - name: order-service
+          image: logo/order-service:training
+          imagePullPolicy: Never
+          envFrom:
+            - configMapRef:
+                name: order-config
+            - secretRef:
+                name: order-secret
+          ports:
+            - name: http
+              containerPort: 8081
+          volumeMounts:
+            - name: order-data
+              mountPath: /data
+      volumes:
+        - name: order-data
+          persistentVolumeClaim:
+            claimName: order-data

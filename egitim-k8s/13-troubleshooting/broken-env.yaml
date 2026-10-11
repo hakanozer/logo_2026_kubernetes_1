@@ -1,0 +1,22 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: bad-env
+  namespace: logo-ms
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: bad-env
+  template:
+    metadata:
+      labels:
+        app: bad-env
+    spec:
+      containers:
+        - name: order-service
+          image: logo/order-service:training
+          imagePullPolicy: Never
+          env:
+            - name: JAVA_TOOL_OPTIONS
+              value: "-XX:TrainingOptionDoesNotExist"

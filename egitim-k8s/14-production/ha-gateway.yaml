@@ -1,0 +1,42 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: api-gateway
+  namespace: logo-ms
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: api-gateway
+  template:
+    metadata:
+      labels:
+        app: api-gateway
+        app.kubernetes.io/part-of: logo-microservices
+        environment: training
+    spec:
+      affinity:
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+            - weight: 100
+              podAffinityTerm:
+                topologyKey: kubernetes.io/hostname
+                labelSelector:
+                  matchLabels:
+                    app: api-gateway
+      containers:
+        - name: api-gateway
+          image: logo/api-gateway:training
+          imagePullPolicy: Never
+          env:
+            - name: GATEWAY_INVENTORY_URL
+              value: http://inventory-service:8083
+            - name: GATEWAY_ORDER_URL
+              value: http://order-service:8081/order
+            - name: GATEWAY_PAYMENT_URL
+              value: http://payment-service:8082
+            - name: GATEWAY_NOTIFICATION_URL
+              value: http://notification-service:8084
+          ports:
+            - name: http
+              containerPort: 8080

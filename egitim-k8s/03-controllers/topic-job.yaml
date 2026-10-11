@@ -1,0 +1,33 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: create-order-topic
+  namespace: logo-ms
+spec:
+  backoffLimit: 4
+  activeDeadlineSeconds: 300
+  template:
+    metadata:
+      labels:
+        app: create-order-topic
+    spec:
+      restartPolicy: OnFailure
+      containers:
+        - name: topic-admin
+          image: confluentinc/cp-kafka:7.6.0
+          command:
+            - /bin/bash
+            - -ec
+            - |
+              until kafka-topics --bootstrap-server kafka:9092 --list >/dev/null 2>&1; do
+                sleep 2
+              done
+              if ! kafka-topics --bootstrap-server kafka:9092 --list | grep -qx order.created; then
+                kafka-topics --bootstrap-server kafka:9092 --create --topic order.created --partitions 3 --replication-factor 1
+              else
+                partitions=$(kafka-topics --bootstrap-server kafka:9092 --describe --topic order.created | awk '{for (i = 1; i <= NF; i++) if ($i == "PartitionCount:") print $(i + 1)}')
+                if [ "$partitions" -lt 3 ]; then
+                  kafka-topics --bootstrap-server kafka:9092 --alter --topic order.created --partitions 3
+                fi
+              fi
+              kafka-topics --bootstrap-server kafka:9092 --describe --topic order.created
